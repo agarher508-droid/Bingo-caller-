@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bingo de Números en Inglés</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Nunito', sans-serif;
+            background: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #4338ca 100%);
+            min-height: 100vh;
+        }
+        .font-fredoka {
+            font-family: 'Fredoka', sans-serif;
+        }
+        /* Glassmorphism effects */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(8px);
+        }
+        /* Custom animations */
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-8px); }
+        }
+        .animate-float {
+            animation: float 3s ease-in-out infinite;
+        }
+        @keyframes pop-in {
+            0% { transform: scale(0) rotate(-180deg); opacity: 0; }
+            80% { transform: scale(1.1) rotate(10deg); opacity: 1; }
+            100% { transform: scale(1) rotate(0deg); opacity: 1; }
+        }
+        .animate-pop {
+            animation: pop-in 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.25);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.4);
+        }
+    </style>
+</head>
+<body class="text-white min-h-screen flex flex-col justify-between p-2 md:p-6 overflow-x-hidden">
+
+    <header class="max-w-6xl w-full mx-auto text-center mb-4">
+        <div class="inline-flex items-center gap-3 bg-white/10 px-6 py-2 rounded-full border border-white/20 mb-2 shadow-lg">
+            <i class="fa-solid me-1 fa-dice text-yellow-400 text-2xl animate-spin" style="animation-duration: 8s;"></i>
+            <h1 class="text-2xl md:text-4xl font-bold font-fredoka tracking-wide bg-clip-text text-transparent bg-gradient-to-r from-yellow-300 via-pink-300 to-cyan-300">
+                Number Bingo English
+            </h1>
+        </div>
+        <p class="text-indigo-200 text-xs md:text-sm max-w-xl mx-auto">
+            Aprende la pronunciación y escritura de los números en inglés jugando a la lotería interactiva.
+        </p>
+    </header>
+
+    <main class="max-w-6xl w-full mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6 flex-grow items-start">
+        
+        <!-- LEFT COLUMN: Controls & Drawn Ball Display (5 cols) -->
+        <section class="lg:col-span-5 flex flex-col gap-6 w-full">
+            
+            <!-- Active Ball Display Card -->
+            <div class="glass-panel rounded-3xl p-6 text-center shadow-2xl relative overflow-hidden flex flex-col items-center justify-between min-h-[320px]">
+                <!-- Background decorative elements -->
+                <div class="absolute -top-10 -left-10 w-32 h-32 bg-pink-500/20 rounded-full blur-2xl"></div>
+                <div class="absolute -bottom-10 -right-10 w-32 h-32 bg-cyan-500/20 rounded-full blur-2xl"></div>
+
+                <div class="w-full flex justify-between items-center z-10">
+                    <span class="text-xs uppercase font-bold tracking-widest text-indigo-200 bg-white/10 px-3 py-1 rounded-full">
+                        Bola Extraída
+                    </span>
+                    <span id="drawn-count" class="text-xs font-semibold text-yellow-300 bg-yellow-500/20 px-3 py-1 rounded-full border border-yellow-500/30">
+                        0 / 0 extraídas
+                    </span>
+                </div>
+
+                <!-- Drawn Ball Container -->
+                <div id="active-ball-container" class="my-4 my-auto relative z-10 flex flex-col items-center justify-center">
+                    <div class="text-center py-8">
+                        <div class="w-28 h-28 md:w-36 md:h-36 rounded-full border-4 border-dashed border-white/30 flex items-center justify-center mx-auto mb-3 text-white/40 animate-pulse">
+                            <i class="fa-solid fa-play text-4xl"></i>
+                        </div>
+                        <p class="text-indigo-200 text-sm font-medium">¡Pulsa "Sacar Número" para empezar!</p>
+                    </div>
+                </div>
+
+                <!-- Extraction Button -->
+                <div class="w-full z-10 pt-2">
+                    <button id="btn-draw" onclick="drawBall()" disabled
+                        class="w-full py-4 px-6 rounded-2xl font-fredoka text-xl font-bold uppercase tracking-wider text-white bg-gradient-to-r from-emerald-400 to-teal-500 hover:from-emerald-300 hover:to-teal-400 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-emerald-500/30 active:scale-95 transition-all transform flex items-center justify-center gap-3">
+                        <i class="fa-solid fa-hand-pointer text-2xl"></i>
+                        <span>Sacar Número</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Animated Cage/Bombo Simulation -->
+            <div class="glass-panel rounded-3xl p-5 shadow-xl flex flex-col items-center justify-center relative overflow-hidden">
+                <div class="w-full flex justify-between items-center mb-2">
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-indigo-200">Bombo de Sorteo</h3>
+                    <div class="flex items-center gap-2">
+                        <button onclick="toggleSound()" id="sound-btn" class="text-xs bg-white/10 hover:bg-white/20 px-3 py-1 rounded-full transition-all text-indigo-200 flex items-center gap-1">
+                            <i class="fa-solid fa-volume-high text-emerald-400" id="sound-icon"></i>
+                            <span id="sound-text">Efectos: ON</span>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Canvas Bombo -->
+                <div class="relative w-full flex justify-center items-center py-2">
+                    <canvas id="bomboCanvas" width="280" height="200" class="max-w-full"></canvas>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- RIGHT COLUMN: Number Selector & Board History (7 cols) -->
+        <section class="lg:col-span-7 flex flex-col gap-6 w-full">
+            
+            <!-- Game Configuration & Selector Card -->
+            <div class="glass-panel rounded-3xl p-5 shadow-xl">
+                <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+                    <h2 class="font-fredoka text-xl text-yellow-300 flex items-center gap-2">
+                        <i class="fa-solid fa-sliders text-yellow-400"></i> Selección de Números
+                    </h2>
+                    
+                    <div class="flex flex-wrap gap-1.5">
+                        <button onclick="setPresetRange(1, 10)" class="px-3 py-1 bg-white/10 hover:bg-white/20 rounded-lg text-xs font-semibold transition-all hover:text-yellow-300 border border-white/10">1-10</button>
+                        <button onclick="setPresetRange(1, 20)" class="px-3 py-1 bg-white/10 hover:bg-white/20 rounded-lg text-xs font-semibold transition-all hover:text-yellow-300 border border-white/10">1-20</button>
+                        <button onclick="setPresetRange(1, 50)" class="px-3 py-1 bg-white/10 hover:bg-white/20 rounded-lg text-xs font-semibold transition-all hover:text-yellow-300 border border-white/10">1-50</button>
+                        <button onclick="setPresetRange(1, 100)" class="px-3 py-1 bg-white/10 hover:bg-white/20 rounded-lg text-xs font-semibold transition-all hover:text-yellow-300 border border-white/10">1-100</button>
+                    </div>
+                </div>
+
+                <!-- Custom Range Inputs and Select All Options -->
+                <div class="flex flex-wrap items-center justify-between gap-3 bg-black/20 p-3 rounded-2xl mb-4 border border-white/5">
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs text-indigo-200">Rango:</span>
+                        <input type="number" id="range-min" min="1" max="100" value="1" class="w-14 bg-white/10 border border-white/20 rounded-lg px-2 py-1 text-center text-sm font-bold text-white focus:outline-none focus:border-yellow-400">
+                        <span class="text-xs text-indigo-200">a</span>
+                        <input type="number" id="range-max" min="1" max="100" value="20" class="w-14 bg-white/10 border border-white/20 rounded-lg px-2 py-1 text-center text-sm font-bold text-white focus:outline-none focus:border-yellow-400">
+                        <button onclick="applyCustomRange()" class="px-3 py-1 bg-indigo-500 hover:bg-indigo-600 text-white rounded-lg text-xs font-semibold transition-all shadow-md">Aplicar</button>
+                    </div>
+
+                    <div class="flex items-center gap-2 ml-auto">
+                        <button onclick="selectAll(true)" class="text-xs text-indigo-200 hover:text-white underline">Todos</button>
+                        <span class="text-indigo-400">•</span>
+                        <button onclick="selectAll(false)" class="text-xs text-indigo-200 hover:text-white underline">Ninguno</button>
+                    </div>
+                </div>
+
+                <!-- Collapsible Grid Selector for fine-grain picking -->
+                <details class="group mb-4">
+                    <summary class="cursor-pointer text-xs font-semibold text-indigo-200 hover:text-white flex items-center justify-between bg-white/5 p-2.5 rounded-xl border border-white/10">
+                        <span><i class="fa-solid fa-list-check me-2"></i>Personalizar números individualmente (<span id="selected-count-label">20</span> seleccionados)</span>
+                        <i class="fa-solid fa-chevron-down group-open:rotate-180 transition-transform"></i>
+                    </summary>
+                    <div id="selection-grid" class="grid grid-cols-5 sm:grid-cols-10 gap-1.5 p-3 mt-2 bg-black/30 rounded-2xl max-h-48 overflow-y-auto border border-white/10">
+                        <!-- Checkboxes populated via JS -->
+                    </div>
+                </details>
+
+                <div class="flex gap-3">
+                    <button onclick="startGame()" class="flex-1 py-3 px-4 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-white font-fredoka font-bold rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 text-base">
+                        <i class="fa-solid fa-rotate-right"></i>
+                        <span>Reiniciar / Iniciar Bingo</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Bingo Board & Played History Grid -->
+            <div class="glass-panel rounded-3xl p-5 shadow-xl flex-grow flex flex-col">
+                <div class="flex items-center justify-between mb-3">
+                    <h2 class="font-fredoka text-xl text-yellow-300 flex items-center gap-2">
+                        <i class="fa-solid fa-table-cells text-yellow-400"></i> Tablero de Bingo
+                    </h2>
+                    <span class="text-xs text-indigo-200">
+                        <span class="inline-block w-3 h-3 bg-emerald-500 rounded-full me-1"></span> Extraído
+                        <span class="inline-block w-3 h-3 bg-white/10 rounded-full ms-2 me-1"></span> Pendiente
+                    </span>
+                </div>
+
+                <!-- Active Bingo Board Cells -->
+                <div id="bingo-board" class="grid grid-cols-5 sm:grid-cols-10 gap-2 p-3 bg-black/20 rounded-2xl max-h-80 overflow-y-auto border border-white/10 flex-grow">
+                    <!-- Board cells generated dynamically -->
+                </div>
+
+                <!-- Recent History Horizontal Bar -->
+                <div class="mt-4 pt-3 border-t border-white/10">
+                    <p class="text-xs font-semibold text-indigo-200 mb-2 uppercase tracking-wider">Historial reciente:</p>
+                    <div id="history-bar" class="flex items-center gap-2 overflow-x-auto pb-2 min-h-[48px]">
+                        <span class="text-xs text-white/40 italic">Aún no han salido bolas.</span>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+
+    </main>
+
+    <footer class="max-w-6xl w-full mx-auto text-center mt-6 py-2 text-xs text-indigo-300/60">
+        Bingo Educativo de Números en Inglés • Diseñado para práctica oral y auditiva
+    </footer>
+
+    <script>
+        // Number translation dictionary to English text
+        const numberToWords = {
+            1: "One", 2: "Two", 3: "Three", 4: "Four", 5: "Five", 6: "Six", 7: "Seven", 8: "Eight", 9: "Nine", 10: "Ten",
+            11: "Eleven", 12: "Twelve", 13: "Thirteen", 14: "Fourteen", 15: "Fifteen", 16: "Sixteen", 17: "Seventeen", 18: "Eighteen", 19: "Nineteen", 20: "Twenty",
+            21: "Twenty-One", 22: "Twenty-Two", 23: "Twenty-Three", 24: "Twenty-Four", 25: "Twenty-Five", 26: "Twenty-Six", 27: "Twenty-Seven", 28: "Twenty-Eight", 29: "Twenty-Nine", 30: "Thirty",
+            31: "Thirty-One", 32: "Thirty-Two", 33: "Thirty-Three", 34: "Thirty-Four", 35: "Thirty-Five", 36: "Thirty-Six", 37: "Thirty-Seven", 38: "Thirty-Eight", 39: "Thirty-Nine", 40: "Forty",
+            41: "Forty-One", 42: "Forty-Two", 43: "Forty-Three", 44: "Forty-Four", 45: "Forty-Five", 46: "Forty-Six", 47: "Forty-Seven", 48: "Forty-Eight", 49: "Forty-Nine", 50: "Fifty",
+            51: "Fifty-One", 52: "Fifty-Two", 53: "Fifty-Three", 54: "Fifty-Four", 55: "Fifty-Five", 56: "Fifty-Six", 57: "Fifty-Seven", 58: "Fifty-Eight", 59: "Fifty-Nine", 60: "Sixty",
+            61: "Sixty-One", 62: "Sixty-Two", 63: "Sixty-Three", 64: "Sixty-Four", 65: "Sixty-Five", 66: "Sixty-Six", 67: "Sixty-Seven", 68: "Sixty-Eight", 69: "Sixty-Nine", 70: "Seventy",
+            71: "Seventy-One", 72: "Seventy-Two", 73: "Seventy-Three", 74: "Seventy-Four", 75: "Seventy-Five", 76: "Seventy-Six", 77: "Seventy-Seven", 78: "Seventy-Eight", 79: "Seventy-Nine", 80: "Eighty",
+            81: "Eighty-One", 82: "Eighty-Two", 83: "Eighty-Three", 84: "Eighty-Four", 85: "Eighty-Five", 86: "Eighty-Six", 87: "Eighty-Seven", 88: "Eighty-Eight", 89: "Eighty-Nine", 90: "Ninety",
+            91: "Ninety-One", 92: "Ninety-Two", 93: "Ninety-Three", 94: "Ninety-Four", 95: "Ninety-Five", 96: "Ninety-Six", 97: "Ninety-Seven", 98: "Ninety-Eight", 99: "Ninety-Nine", 100: "One Hundred"
+        };
+
+        // Vibrant colors for balls
+        const ballColors = [
+            { bg: "from-pink-500 to-rose-600", border: "border-pink-300", text: "text-white" },
+            { bg: "from-purple-500 to-indigo-600", border: "border-purple-300", text: "text-white" },
+            { bg: "from-cyan-400 to-blue-600", border: "border-cyan-200", text: "text-white" },
+            { bg: "from-emerald-400 to-teal-600", border: "border-emerald-200", text: "text-white" },
+            { bg: "from-amber-400 to-orange-500", border: "border-amber-200", text: "text-white" },
+            { bg: "from-red-500 to-rose-700", border: "border-red-300", text: "text-white" }
+        ];
+
+        // State Variables
+        let selectedNumbers = new Set();
+        let remainingBalls = [];
+        let drawnHistory = [];
+        let soundEnabled = true;
+        let isSpinning = false;
+        let speechVoices = [];
+
+        // Audio Context Synthesizer for sound effects
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        let audioCtx = null;
+
+        function initAudioContext() {
+            if (!audioCtx) {
+                audioCtx = new AudioCtx();
+            }
+        }
+
+        function playSynthesizedSound(type) {
+            if (!soundEnabled) return;
+            try {
+                initAudioContext();
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                const now = audioCtx.currentTime;
+
+                if (type === 'click') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(600, now);
+                    osc.frequency.exponentialRampToValueAtTime(200, now + 0.05);
+                    gain.gain.setValueAtTime(0.2, now);
+                    gain.gain.linearRampToValueAtTime(0.01, now + 0.05);
+                    osc.start(now);
+                    osc.stop(now + 0.05);
+                } else if (type === 'draw') {
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(300, now);
+                    osc.frequency.exponentialRampToValueAtTime(800, now + 0.2);
+                    gain.gain.setValueAtTime(0.3, now);
+                    gain.gain.linearRampToValueAtTime(0.01, now + 0.2);
+                    osc.start(now);
+                    osc.stop(now + 0.2);
+                } else if (type === 'win') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(400, now);
+                    osc.frequency.setValueAtTime(523.25, now + 0.1); // C5
+                    osc.frequency.setValueAtTime(659.25, now + 0.2); // E5
+                    osc.frequency.setValueAtTime(783.99, now + 0.3); // G5
+                    osc.frequency.setValueAtTime(1046.50, now + 0.4); // C6
+                    gain.gain.setValueAtTime(0.3, now);
+                    gain.gain.linearRampToValueAtTime(0.01, now + 0.6);
+                    osc.start(now);
+                    osc.stop(now + 0.6);
+                }
+            } catch (e) {
+                console.log("Web Audio API error", e);
+            }
+        }
+
+        // Initialize Speech Synthesis Voices
+        function initVoices() {
+            if ('speechSynthesis' in window) {
+                speechVoices = window.speechSynthesis.getVoices();
+                window.speechSynthesis.onvoiceschanged = () => {
+                    speechVoices = window.speechSynthesis.getVoices();
+                };
+            }
+        }
+
+        // Pronounce English Speech
+        function speakNumber(text) {
+            if (!('speechSynthesis' in window)) return;
+            
+            window.speechSynthesis.cancel(); // Stop current speech
+            
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.rate = 0.85; // Slightly slower for clear learning
+            utterance.pitch = 1.0;
+            utterance.lang = 'en-US';
+
+            // Attempt to find high quality US/UK voice
+            const englishVoices = speechVoices.filter(v => v.lang.startsWith('en'));
+            if (englishVoices.length > 0) {
+                const preferredVoice = englishVoices.find(v => v.name.includes('Google') || v.name.includes('Natural') || v.name.includes('Samantha') || v.name.includes('Daniel')) || englishVoices[0];
+                utterance.voice = preferredVoice;
+            }
+
+            window.speechSynthesis.speak(utterance);
+        }
+
+        // Helper: Get color assigned to a specific number
+        function getBallColor(num) {
+            return ballColors[(num - 1) % ballColors.length];
+        }
+
+        // Populating Fine-grained Selection Grid (1-100)
+        function renderSelectionGrid() {
+            const grid = document.getElementById('selection-grid');
+            grid.innerHTML = '';
+
+            for (let i = 1; i <= 100; i++) {
+                const isChecked = selectedNumbers.has(i);
+                const item = document.createElement('label');
+                item.className = `flex items-center justify-center p-2 text-xs font-bold rounded-lg cursor-pointer transition-all border select-none ${
+                    isChecked 
+                    ? 'bg-yellow-400 text-slate-900 border-yellow-300 shadow-md scale-105' 
+                    : 'bg-white/5 text-white/70 border-white/10 hover:bg-white/10'
+                }`;
+                
+                item.innerHTML = `
+                    <input type="checkbox" class="sr-only" value="${i}" ${isChecked ? 'checked' : ''} onchange="toggleNumberSelection(${i})">
+                    <span>${i}</span>
+                `;
+                grid.appendChild(item);
+            }
+
+            document.getElementById('selected-count-label').innerText = selectedNumbers.size;
+        }
+
+        function toggleNumberSelection(num) {
+            playSynthesizedSound('click');
+            if (selectedNumbers.has(num)) {
+                selectedNumbers.delete(num);
+            } else {
+                selectedNumbers.add(num);
+            }
+            renderSelectionGrid();
+        }
+
+        function selectAll(enable) {
+            playSynthesizedSound('click');
+            selectedNumbers.clear();
+            if (enable) {
+                for (let i = 1; i <= 100; i++) selectedNumbers.add(i);
+            }
+            renderSelectionGrid();
+        }
+
+        function setPresetRange(min, max) {
+            playSynthesizedSound('click');
+            document.getElementById('range-min').value = min;
+            document.getElementById('range-max').value = max;
+            applyCustomRange();
+        }
+
+        function applyCustomRange() {
+            playSynthesizedSound('click');
+            const min = parseInt(document.getElementById('range-min').value) || 1;
+            const max = parseInt(document.getElementById('range-max').value) || 100;
+
+            const start = Math.max(1, Math.min(min, max));
+            const end = Math.min(100, Math.max(min, max));
+
+            selectedNumbers.clear();
+            for (let i = start; i <= end; i++) {
+                selectedNumbers.add(i);
+            }
+            renderSelectionGrid();
+            startGame();
+        }
+
+        // Initialize / Restart Game
+        function startGame() {
+            playSynthesizedSound('win');
+            
+            if (selectedNumbers.size === 0) {
+                // Default to 1-20 if empty
+                for (let i = 1; i <= 20; i++) selectedNumbers.add(i);
+                renderSelectionGrid();
+            }
+
+            remainingBalls = Array.from(selectedNumbers).sort((a, b) => a - b);
+            drawnHistory = [];
+
+            updateCounters();
+            renderBingoBoard();
+            renderHistoryBar();
+            resetActiveBallDisplay();
+
+            document.getElementById('btn-draw').disabled = remainingBalls.length === 0;
+            
+            // Re-initialize cage animation particles
+            initBomboBalls();
+        }
+
+        function updateCounters() {
+            const total = selectedNumbers.size;
+            const drawn = drawnHistory.length;
+            document.getElementById('drawn-count').innerText = `${drawn} / ${total} extraídas`;
+        }
+
+        function resetActiveBallDisplay() {
+            const container = document.getElementById('active-ball-container');
+            container.innerHTML = `
+                <div class="text-center py-8 animate-float">
+                    <div class="w-28 h-28 md:w-36 md:h-36 rounded-full border-4 border-dashed border-white/30 flex items-center justify-center mx-auto mb-3 text-white/40">
+                        <i class="fa-solid fa-play text-4xl"></i>
+                    </div>
+                    <p class="text-indigo-200 text-sm font-medium">¡Pulsa "Sacar Número" para empezar!</p>
+                </div>
+            `;
+        }
+
+        // Render Bingo Board Grid
+        function renderBingoBoard() {
+            const board = document.getElementById('bingo-board');
+            board.innerHTML = '';
+
+            const sortedList = Array.from(selectedNumbers).sort((a, b) => a - b);
+
+            sortedList.forEach(num => {
+                const isDrawn = drawnHistory.includes(num);
+                const color = getBallColor(num);
+
+                const cell = document.createElement('div');
+                cell.id = `board-cell-${num}`;
+                cell.className = `aspect-square rounded-xl flex flex-col items-center justify-center font-bold text-sm transition-all duration-300 relative border ${
+                    isDrawn 
+                    ? `bg-gradient-to-br ${color.bg} text-white ${color.border} shadow-lg scale-95 opacity-100` 
+                    : 'bg-white/5 text-white/50 border-white/10 hover:bg-white/10'
+                }`;
+
+                cell.innerHTML = `
+                    <span class="text-base md:text-lg font-fredoka">${num}</span>
+                    <span class="text-[9px] font-normal truncate max-w-full px-1 opacity-80">${numberToWords[num]}</span>
+                `;
+
+                if (isDrawn) {
+                    cell.onclick = () => speakNumber(numberToWords[num]);
+                    cell.classList.add('cursor-pointer');
+                }
+
+                board.appendChild(cell);
+            });
+        }
+
+        function renderHistoryBar() {
+            const bar = document.getElementById('history-bar');
+            bar.innerHTML = '';
+
+            if (drawnHistory.length === 0) {
+                bar.innerHTML = `<span class="text-xs text-white/40 italic">Aún no han salido bolas.</span>`;
+                return;
+            }
+
+            // Show last 10 drawn balls in reverse order
+            const recent = [...drawnHistory].reverse().slice(0, 10);
+
+            recent.forEach(num => {
+                const color = getBallColor(num);
+                const ball = document.createElement('button');
+                ball.onclick = () => speakNumber(numberToWords[num]);
+                ball.className = `w-10 h-10 rounded-full bg-gradient-to-br ${color.bg} ${color.border} border text-white font-fredoka font-bold text-xs flex-shrink-0 flex items-center justify-center shadow-md hover:scale-110 transition-transform animate-pop`;
+                ball.innerText = num;
+                ball.title = `${num} - ${numberToWords[num]} (Haz clic para escuchar)`;
+                bar.appendChild(ball);
+            });
+        }
+
+        // Draw Ball Action
+        function drawBall() {
+            if (remainingBalls.length === 0 || isSpinning) return;
+
+            isSpinning = true;
+            document.getElementById('btn-draw').disabled = true;
+
+            playSynthesizedSound('draw');
+            spinBomboAnimation(600, () => {
+                // Randomly pick a ball
+                const randomIndex = Math.floor(Math.random() * remainingBalls.length);
+                const drawnNum = remainingBalls.splice(randomIndex, 1)[0];
+                drawnHistory.push(drawnNum);
+
+                const wordInEnglish = numberToWords[drawnNum];
+                const color = getBallColor(drawnNum);
+
+                // Display Active Ball
+                const container = document.getElementById('active-ball-container');
+                container.innerHTML = `
+                    <div class="flex flex-col items-center animate-pop">
+                        <!-- Big Ball Display -->
+                        <div class="relative group cursor-pointer mb-3" onclick="speakNumber('${wordInEnglish}')">
+                            <div class="w-32 h-32 md:w-40 md:h-40 rounded-full bg-gradient-to-br ${color.bg} ${color.border} border-4 shadow-2xl flex flex-col items-center justify-center text-white relative overflow-hidden transform group-hover:scale-105 transition-transform">
+                                <!-- Glossy highlight effect -->
+                                <div class="absolute -top-6 -left-6 w-20 h-20 bg-white/30 rounded-full blur-md"></div>
+                                
+                                <span class="text-4xl md:text-5xl font-black font-fredoka drop-shadow-md">${drawnNum}</span>
+                            </div>
+                            <!-- Speaker badge -->
+                            <button class="absolute bottom-1 right-1 bg-yellow-400 text-slate-900 w-10 h-10 rounded-full flex items-center justify-center shadow-lg border-2 border-white hover:bg-yellow-300 transition-all active:scale-90">
+                                <i class="fa-solid fa-volume-high text-sm"></i>
+                            </button>
+                        </div>
+
+                        <!-- Word Text -->
+                        <div class="text-center">
+                            <h3 class="text-2xl md:text-3xl font-black font-fredoka text-yellow-300 tracking-wide drop-shadow">
+                                "${wordInEnglish}"
+                            </h3>
+                            <p class="text-xs text-indigo-200 mt-1">Haz clic en la bola para repetir la voz</p>
+                        </div>
+                    </div>
+                `;
+
+                // Pronounce Voice
+                speakNumber(wordInEnglish);
+
+                // Update UI State
+                updateCounters();
+                renderBingoBoard();
+                renderHistoryBar();
+
+                isSpinning = false;
+                if (remainingBalls.length > 0) {
+                    document.getElementById('btn-draw').disabled = false;
+                } else {
+                    playSynthesizedSound('win');
+                    setTimeout(() => {
+                        alert("¡Han salido todas las bolas del bingo!");
+                    }, 500);
+                }
+            });
+        }
+
+        // Sound Toggle
+        function toggleSound() {
+            soundEnabled = !soundEnabled;
+            document.getElementById('sound-text').innerText = soundEnabled ? "Efectos: ON" : "Efectos: OFF";
+            document.getElementById('sound-icon').className = soundEnabled ? "fa-solid fa-volume-high text-emerald-400" : "fa-solid fa-volume-xmark text-red-400";
+        }
+
+        // --- CANVAS ANIMATION FOR THE BOMBO CAGE ---
+        const canvas = document.getElementById('bomboCanvas');
+        const ctx = canvas.getContext('2d');
+        let bomboBalls = [];
+        let cageAngle = 0;
+        let cageSpeed = 0.02;
+
+        class CageBall {
+            constructor(num) {
+                this.num = num;
+                this.r = 10;
+                this.x = (Math.random() - 0.5) * 80;
+                this.y = (Math.random() - 0.5) * 80;
+                this.vx = (Math.random() - 0.5) * 4;
+                this.vy = (Math.random() - 0.5) * 4;
+                this.color = getBallColor(num);
+            }
+
+            update(speedMultiplier) {
+                // Simple physics bouncing inside cage sphere (radius 75)
+                this.x += this.vx * speedMultiplier;
+                this.y += this.vy * speedMultiplier;
+
+                // Add gravity effect towards bottom of spinning cage
+                this.vy += 0.15;
+
+                const dist = Math.sqrt(this.x * this.x + this.y * this.y);
+                const maxR = 65;
+                if (dist > maxR) {
+                    const angle = Math.atan2(this.y, this.x);
+                    this.x = Math.cos(angle) * maxR;
+                    this.y = Math.sin(angle) * maxR;
+                    
+                    // Bounce back inward
+                    this.vx = -this.vx * 0.7 + (Math.random() - 0.5) * 2;
+                    this.vy = -this.vy * 0.7 + (Math.random() - 0.5) * 2;
+                }
+            }
+
+            draw(centerX, centerY) {
+                ctx.save();
+                ctx.translate(centerX + this.x, centerY + this.y);
+
+                // Ball Circle
+                ctx.beginPath();
+                ctx.arc(0, 0, this.r, 0, Math.PI * 2);
+                ctx.fillStyle = '#f59e0b'; // Gold ball in canvas
+                ctx.fill();
+                ctx.strokeStyle = '#ffffff';
+                ctx.lineWidth = 1.5;
+                ctx.stroke();
+
+                // Ball Text
+                ctx.fillStyle = '#000000';
+                ctx.font = 'bold 9px Nunito';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(this.num, 0, 0);
+
+                ctx.restore();
+            }
+        }
+
+        function initBomboBalls() {
+            bomboBalls = remainingBalls.map(num => new CageBall(num));
+        }
+
+        function drawBomboCage() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2 - 10;
+            const cageRadius = 75;
+
+            // Draw Cage Stand Base
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            ctx.moveTo(centerX - 50, centerY + cageRadius + 20);
+            ctx.lineTo(centerX, centerY);
+            ctx.lineTo(centerX + 50, centerY + cageRadius + 20);
+            ctx.stroke();
+
+            // Draw Base Stand Bar
+            ctx.beginPath();
+            ctx.moveTo(centerX - 60, centerY + cageRadius + 20);
+            ctx.lineTo(centerX + 60, centerY + cageRadius + 20);
+            ctx.stroke();
+
+            // Rotate Cage
+            cageAngle += cageSpeed;
+
+            // Draw Wire Cage Sphere
+            ctx.save();
+            ctx.translate(centerX, centerY);
+            
+            // Outer Ring
+            ctx.beginPath();
+            ctx.arc(0, 0, cageRadius, 0, Math.PI * 2);
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.6)';
+            ctx.lineWidth = 3;
+            ctx.stroke();
+
+            // Latitudinal wire ribs
+            for (let i = -2; i <= 2; i++) {
+                ctx.beginPath();
+                ctx.ellipse(0, i * 22, Math.sqrt(Math.max(0, cageRadius*cageRadius - (i*22)*(i*22))), 8, 0, 0, Math.PI * 2);
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+                ctx.lineWidth = 1;
+                ctx.stroke();
+            }
+
+            // Rotating longitudinal wires
+            for (let a = 0; a < Math.PI; a += Math.PI / 4) {
+                ctx.beginPath();
+                ctx.ellipse(0, 0, Math.abs(Math.sin(cageAngle + a)) * cageRadius, cageRadius, cageAngle, 0, Math.PI * 2);
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.25)';
+                ctx.lineWidth = 1.5;
+                ctx.stroke();
+            }
+
+            ctx.restore();
+
+            // Update & Render Balls inside
+            const speedMult = cageSpeed > 0.05 ? 3 : 1;
+            bomboBalls.forEach(ball => {
+                ball.update(speedMult);
+                ball.draw(centerX, centerY);
+            });
+
+            requestAnimationFrame(drawBomboCage);
+        }
+
+        function spinBomboAnimation(duration, onComplete) {
+            const startSpeed = 0.25;
+            cageSpeed = startSpeed;
+
+            const interval = setInterval(() => {
+                bomboBalls.forEach(b => {
+                    b.vx += (Math.random() - 0.5) * 6;
+                    b.vy += (Math.random() - 0.5) * 6;
+                });
+            }, 80);
+
+            setTimeout(() => {
+                clearInterval(interval);
+                cageSpeed = 0.02;
+                // Re-sync balls array with remaining numbers
+                initBomboBalls();
+                if (onComplete) onComplete();
+            }, duration);
+        }
+
+        // Initialize Page on Load
+        window.onload = function() {
+            initVoices();
+            renderSelectionGrid();
+            startGame();
+            drawBomboCage();
+        };
+    </script>
+</body>
+</html>
